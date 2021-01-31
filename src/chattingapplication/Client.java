@@ -1,5 +1,6 @@
 package chattingapplication;
 
+import static chattingapplication.Server.skt;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -7,6 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,7 +25,12 @@ public class Client extends JFrame implements ActionListener {
     JPanel header;
     JTextField message;
     JButton send;
-    JTextArea screen;
+    static JTextArea screen;
+    
+    static Socket s;
+    
+    static DataInputStream din;
+    static DataOutputStream dout;
     
     Client() {
         
@@ -115,13 +125,31 @@ public class Client extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        String out = message.getText();
-        screen.setText(screen.getText()+"\n\t\t\t\t\t"+out);
-        message.setText("");
+        try {
+            String out = message.getText();
+            screen.setText(screen.getText()+"\n\t\t\t\t\t"+out);
+            dout.writeUTF(out);
+            message.setText("");
+        } catch(Exception e) {}
     }
     
     public static void main (String[] args) {
         new Client().setVisible(true);
+        
+        String inputMessage = "";
+        
+        try {
+            s = new Socket("127.0.0.1", 6000);
+            
+            din = new DataInputStream(s.getInputStream());
+            dout = new DataOutputStream(s.getOutputStream());
+            
+            inputMessage = din.readUTF();
+            screen.setText(screen.getText()+"\n"+inputMessage);
+            
+            s.close();
+            
+        } catch (Exception e) {}
     }
 
 }
