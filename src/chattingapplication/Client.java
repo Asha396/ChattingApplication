@@ -1,6 +1,5 @@
 package chattingapplication;
 
-import static chattingapplication.Server.skt;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -10,14 +9,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class Client extends JFrame implements ActionListener {
@@ -25,7 +22,7 @@ public class Client extends JFrame implements ActionListener {
     JPanel header;
     JTextField message;
     JButton send;
-    static JTextArea screen;
+    static JPanel screen;
     
     static Socket s;
     
@@ -93,11 +90,8 @@ public class Client extends JFrame implements ActionListener {
         dotsIcon.setBounds(410, 20, 10, 25); 
         header.add(dotsIcon);
         
-        screen = new JTextArea();
+        screen = new JPanel();
         screen.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
-        screen.setEditable(false);
-        screen.setLineWrap(true);
-        screen.setWrapStyleWord(true);
         screen.setBounds(5, 75, 440, 570);
         add(screen);
         
@@ -127,29 +121,31 @@ public class Client extends JFrame implements ActionListener {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         try {
             String out = message.getText();
-            screen.setText(screen.getText()+"\n\t\t\t\t\t"+out);
             dout.writeUTF(out);
             message.setText("");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
     
     public static void main (String[] args) {
         new Client().setVisible(true);
         
-        String  messageInput = "";
+        String messageInput = "";
         
         try {
-            s = new Socket("127.0.0.1", 6001);
+            s = new Socket("127.0.0.1", 6000);
             
             din = new DataInputStream(s.getInputStream());
             dout = new DataOutputStream(s.getOutputStream());
             
             messageInput = din.readUTF();
-            screen.setText(screen.getText()+"\n"+messageInput);
             
             s.close();
             
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
 }

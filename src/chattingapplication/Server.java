@@ -1,6 +1,6 @@
 package chattingapplication;
 
-import static chattingapplication.Client.screen;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -12,20 +12,26 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 public class Server extends JFrame implements ActionListener {
     
     JPanel header;
     JTextField message;
     JButton send;
-    static JTextArea screen;
+    static JPanel screen;
+    
+    Box vertical = Box.createVerticalBox();
     
     static ServerSocket skt;
     static Socket s;
@@ -94,11 +100,7 @@ public class Server extends JFrame implements ActionListener {
         dotsIcon.setBounds(410, 20, 10, 25); 
         header.add(dotsIcon);
         
-        screen = new JTextArea();
-        screen.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
-        screen.setEditable(false);
-        screen.setLineWrap(true);
-        screen.setWrapStyleWord(true);
+        screen = new JPanel();
         screen.setBounds(5, 75, 440, 570);
         add(screen);
         
@@ -128,10 +130,44 @@ public class Server extends JFrame implements ActionListener {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         try {
             String out = message.getText();
-            screen.setText(screen.getText()+"\n\t\t\t\t\t"+out);
+            
+            JPanel chat = formatLabel(out);
+            
+            screen.setLayout(new BorderLayout());
+            
+            JPanel right = new JPanel(new BorderLayout());
+            right.add(chat, BorderLayout.LINE_END);
+            vertical.add(right);
+            
+            screen.add(vertical, BorderLayout.PAGE_START);
+            
+            //screen.add(chat);
             dout.writeUTF(out);
             message.setText("");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+    
+    public JPanel formatLabel(String out) {
+        JPanel chat = new JPanel();
+        chat.setLayout(new BoxLayout(chat, BoxLayout.Y_AXIS));
+        
+        JLabel text = new JLabel(out);
+        text.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        text.setBackground(new Color(37, 211, 102));
+        text.setOpaque(true);
+        text.setBorder(new EmptyBorder(15, 15, 15, 15));
+        
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        
+        JLabel time = new JLabel();
+        time.setText(sdf.format(cal.getTime()));
+        
+        chat.add(text);
+        chat.add(time);
+        return chat;
     }
     
     public static void main (String[] args) {
@@ -140,18 +176,19 @@ public class Server extends JFrame implements ActionListener {
         String  messageInput = "";
         
         try {
-            skt = new ServerSocket(6001);
+            skt = new ServerSocket(6000);
             s = skt.accept();
             
             din = new DataInputStream(s.getInputStream());
             dout = new DataOutputStream(s.getOutputStream());
             
             messageInput = din.readUTF();
-            screen.setText(screen.getText()+"\n"+messageInput);
             
             skt.close();
             s.close();
             
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }
