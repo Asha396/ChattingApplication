@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
@@ -19,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 
 public class Server extends JFrame implements ActionListener {
     
@@ -32,6 +35,8 @@ public class Server extends JFrame implements ActionListener {
     
     static DataInputStream din;
     static DataOutputStream dout;
+    
+    Boolean typing;
     
     Server() {
         
@@ -73,6 +78,16 @@ public class Server extends JFrame implements ActionListener {
         senderStatus.setBounds(110, 35, 100, 20);
         header.add(senderStatus);
         
+        Timer t = new Timer(1, new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if (typing) {
+                    senderStatus.setText("Active now");
+                }
+            }
+        });
+        
+        t.setInitialDelay(2000);
+        
         ImageIcon video1 = new ImageIcon(ClassLoader.getSystemResource("chattingapplication/icons/video.png"));
         Image video2 = video1.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT);
         ImageIcon video3 = new ImageIcon(video2);
@@ -106,6 +121,21 @@ public class Server extends JFrame implements ActionListener {
         message.setFont(new Font("SAN_SERIF", Font.PLAIN, 18));
         message.setBounds(5, 650, 320, 45);
         add(message);
+        
+        message.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent ke) {
+                senderStatus.setText("typing...");
+                t.stop();
+                typing = true;
+            }
+
+            public void keyReleased(KeyEvent ke) {
+                typing = false;
+                if (!t.isRunning()) {
+                    t.start();
+                }
+            }
+        });
         
         send = new JButton("Send");
         send.setFont(new Font("SAN_SERIF", Font.BOLD, 18));
