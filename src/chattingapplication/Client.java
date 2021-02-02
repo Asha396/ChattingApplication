@@ -1,41 +1,41 @@
 package chattingapplication;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
-public class Client extends JFrame implements ActionListener {
+public class Client implements ActionListener {
     
     JPanel header;
     JTextField message;
     JButton send;
     static JPanel screen;
+    static JFrame frame = new JFrame();
+    
+    static Box vertical = Box.createVerticalBox();
     
     static Socket s;
     
     static DataInputStream din;
     static DataOutputStream dout;
     
+    Boolean typing;
+    
     Client() {
         
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
         header = new JPanel();
         header.setLayout(null);
         header.setBackground(new Color(7, 94, 84));
         header.setBounds(0, 0, 450, 70);
-        add(header);
+        frame.add(header);
         
         ImageIcon arrow1 = new ImageIcon(ClassLoader.getSystemResource("chattingapplication/icons/arrow.png"));
         Image arrow2 = arrow1.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT);
@@ -69,6 +69,16 @@ public class Client extends JFrame implements ActionListener {
         receiverStatus.setBounds(110, 35, 100, 20);
         header.add(receiverStatus);
         
+        Timer t = new Timer(1, new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if (typing) {
+                    receiverStatus.setText("Active now");
+                }
+            }
+        });
+        
+        t.setInitialDelay(2000);
+        
         ImageIcon video1 = new ImageIcon(ClassLoader.getSystemResource("chattingapplication/icons/video.png"));
         Image video2 = video1.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT);
         ImageIcon video3 = new ImageIcon(video2);
@@ -93,12 +103,28 @@ public class Client extends JFrame implements ActionListener {
         screen = new JPanel();
         screen.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
         screen.setBounds(5, 75, 440, 570);
-        add(screen);
+        frame.add(screen);
         
         message = new JTextField();
         message.setFont(new Font("SAN_SERIF", Font.PLAIN, 18));
         message.setBounds(5, 650, 320, 45);
-        add(message);
+        frame.add(message);
+        
+        message.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent ke) {
+                receiverStatus.setText("typing...");
+                t.stop();
+                typing = true;
+            }
+
+            public void keyReleased(KeyEvent ke) {
+                typing = false;
+                if (!t.isRunning()) {
+                    t.start();
+                }
+            }
+        });
+        
         
         send = new JButton("Send");
         send.setFont(new Font("SAN_SERIF", Font.BOLD, 18));
@@ -106,14 +132,14 @@ public class Client extends JFrame implements ActionListener {
         send.setBounds(330, 650, 113, 45);
         send.setBackground(new Color(7, 94, 84));
         send.addActionListener(this);
-        add(send);
+        frame.add(send);
         
-        getContentPane().setBackground(Color.WHITE);
-        setLayout(null);
-        setSize(450, 700);
-        setLocation(1100, 200);
-        setUndecorated(true);
-        setVisible(true);
+        frame.getContentPane().setBackground(Color.WHITE);
+        frame.setLayout(null);
+        frame.setSize(450, 700);
+        frame.setLocation(1100, 200);
+        frame.setUndecorated(true);
+        frame.setVisible(true);
     }
     
     @Override
@@ -121,15 +147,49 @@ public class Client extends JFrame implements ActionListener {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         try {
             String out = message.getText();
+            
+            JPanel chat = formatLabel(out);
+            
+            screen.setLayout(new BorderLayout());
+            
+            JPanel right = new JPanel(new BorderLayout());
+            right.add(chat, BorderLayout.LINE_END);
+            vertical.add(right);
+            vertical.add(Box.createVerticalStrut(15));
+            
+            screen.add(vertical, BorderLayout.PAGE_START);
+            
+            //screen.add(chat);
             dout.writeUTF(out);
             message.setText("");
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Exception in actionPerformed method (Client) : "+e);
         }
     }
     
+    public static JPanel formatLabel(String out) {
+        JPanel chat = new JPanel();
+        chat.setLayout(new BoxLayout(chat, BoxLayout.Y_AXIS));
+        
+        JLabel text = new JLabel("<html><p style = \"width : 150px\">"+out+"</p></html>");
+        text.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        text.setBackground(new Color(37, 211, 102));
+        text.setOpaque(true);
+        text.setBorder(new EmptyBorder(15, 15, 15, 15));
+        
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        
+        JLabel time = new JLabel();
+        time.setText(sdf.format(cal.getTime()));
+        
+        chat.add(text);
+        chat.add(time);
+        return chat;
+    }
+    
     public static void main (String[] args) {
-        new Client().setVisible(true);
+        new Client().frame.setVisible(true);
         
         String messageInput = "";
         
@@ -139,12 +199,21 @@ public class Client extends JFrame implements ActionListener {
             din = new DataInputStream(s.getInputStream());
             dout = new DataOutputStream(s.getOutputStream());
             
-            messageInput = din.readUTF();
-            
-            s.close();
+            while(true) {
+                screen.setLayout(new BorderLayout());
+                    messageInput = din.readUTF();
+                    JPanel chat = formatLabel(messageInput);
+                    
+                    JPanel left = new JPanel(new BorderLayout());
+                    left.add(chat, BorderLayout.LINE_START);
+                    vertical.add(left);
+                    vertical.add(Box.createVerticalStrut(15));
+                    screen.add(vertical, BorderLayout.PAGE_START);
+                    frame.validate();
+                }
             
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Exception in main method (Client) : "+e);
         }
     }
 
