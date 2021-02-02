@@ -2,8 +2,7 @@ package chattingapplication;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -144,10 +143,9 @@ public class Client implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent ae) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         try {
             String out = message.getText();
-            
+            sendTextToFile(out);
             JPanel chat = formatLabel(out);
             
             screen.setLayout(new BorderLayout());
@@ -164,6 +162,17 @@ public class Client implements ActionListener {
             message.setText("");
         } catch (Exception e) {
             System.out.println("Exception in actionPerformed method (Client) : "+e);
+            e.printStackTrace();
+        }
+    }
+    
+    public void sendTextToFile(String message) throws FileNotFoundException {
+        try(FileWriter file = new FileWriter("chat.txt", true);
+                PrintWriter print = new PrintWriter(new BufferedWriter(file));) {
+            print.println("Steve: "+message);
+        } catch (Exception e) {
+            System.out.println("Exception in sendTextToFile method (Client) : "+e);
+            e.printStackTrace();
         }
     }
     
@@ -214,6 +223,7 @@ public class Client implements ActionListener {
             
         } catch (Exception e) {
             System.out.println("Exception in main method (Client) : "+e);
+            e.printStackTrace();
         }
     }
 

@@ -2,8 +2,7 @@ package chattingapplication;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -148,7 +147,7 @@ public class Server implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         try {
             String out = message.getText();
-            
+            sendTextToFile(out);
             JPanel chat = formatLabel(out);
             
             screen.setLayout(new BorderLayout());
@@ -165,6 +164,17 @@ public class Server implements ActionListener {
             message.setText("");
         } catch (Exception e) {
             System.out.println("Exception in actionPerformed method (Server) : "+e);
+            e.printStackTrace();
+        }
+    }
+    
+    public void sendTextToFile(String message) throws FileNotFoundException {
+        try(FileWriter file = new FileWriter("chat.txt", true);
+                PrintWriter print = new PrintWriter(new BufferedWriter(file));) {
+            print.println("Dustin: "+message);
+        } catch (Exception e) {
+            System.out.println("Exception in sendTextToFile method (Server) : "+e);
+            e.printStackTrace();
         }
     }
     
@@ -216,6 +226,7 @@ public class Server implements ActionListener {
             
         } catch (Exception e) {
             System.out.println("Exception in main method (Server) : "+e);
+            e.printStackTrace();
         }
     }
 }
