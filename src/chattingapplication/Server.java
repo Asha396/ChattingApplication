@@ -46,6 +46,7 @@ public class Server implements ActionListener {
         header.add(backArrow);
         
         backArrow.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent ae) {
                 System.exit(0);
             }
@@ -70,11 +71,9 @@ public class Server implements ActionListener {
         senderStatus.setBounds(110, 35, 100, 20);
         header.add(senderStatus);
         
-        Timer t = new Timer(1, new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                if (typing) {
-                    senderStatus.setText("Active now");
-                }
+        Timer t = new Timer(1, (ActionEvent ae) -> {
+            if (typing) {
+                senderStatus.setText("Active now");
             }
         });
         
@@ -103,8 +102,13 @@ public class Server implements ActionListener {
         
         screen = new JPanel(); 
         screen.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
-        screen.setBounds(5, 75, 440, 570);
-        frame.add(screen);
+        //screen.setBounds(5, 75, 440, 570);
+        //frame.add(screen);
+        
+        JScrollPane scroll = new JScrollPane(screen);
+        scroll.setBounds(5, 75, 440, 570);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        frame.add(scroll);
         
         message = new JTextField();
         message.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
@@ -112,12 +116,14 @@ public class Server implements ActionListener {
         frame.add(message);
         
         message.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent ke) {
                 senderStatus.setText("typing...");
                 t.stop();
                 typing = true;
             }
 
+            @Override
             public void keyReleased(KeyEvent ke) {
                 typing = false;
                 if (!t.isRunning()) {

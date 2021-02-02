@@ -44,6 +44,7 @@ public class Client implements ActionListener {
         header.add(backArrow);
         
         backArrow.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent ae) {
                 System.exit(0);
             }
@@ -68,11 +69,9 @@ public class Client implements ActionListener {
         receiverStatus.setBounds(110, 35, 100, 20);
         header.add(receiverStatus);
         
-        Timer t = new Timer(1, new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                if (typing) {
-                    receiverStatus.setText("Active now");
-                }
+        Timer t = new Timer(1, (ActionEvent ae) -> {
+            if (typing) {
+                receiverStatus.setText("Active now");
             }
         });
         
@@ -110,12 +109,14 @@ public class Client implements ActionListener {
         frame.add(message);
         
         message.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent ke) {
                 receiverStatus.setText("typing...");
                 t.stop();
                 typing = true;
             }
 
+            @Override
             public void keyReleased(KeyEvent ke) {
                 typing = false;
                 if (!t.isRunning()) {
