@@ -3,11 +3,13 @@ package chattingapplication;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.Socket;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ScrollBarUI;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class Client implements ActionListener {
     
@@ -100,8 +102,35 @@ public class Client implements ActionListener {
         
         screen = new JPanel();
         screen.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
-        screen.setBounds(5, 75, 440, 570);
-        frame.add(screen);
+        //screen.setBounds(5, 75, 440, 570);
+        //frame.add(screen);
+
+        JScrollPane scroll = new JScrollPane(screen);
+        scroll.setBounds(5, 75, 440, 570);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+
+        ScrollBarUI ui = new BasicScrollBarUI() {
+            @Override
+            protected JButton createDecreaseButton(int i) {
+                JButton button = super.createDecreaseButton(i);
+                button.setBackground(new Color(7, 94, 84));
+                button.setForeground(Color.WHITE);
+                this.thumbColor = new Color(7, 94, 84);
+                return button;
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int i) {
+                JButton button = super.createIncreaseButton(i);
+                button.setBackground(new Color(7, 94, 84));
+                button.setForeground(Color.WHITE);
+                this.thumbColor = new Color(7, 94, 84);
+                return button;
+            }
+        };
+        
+        scroll.getVerticalScrollBar().setUI(ui);
+        frame.add(scroll);
         
         message = new JTextField();
         message.setFont(new Font("SAN_SERIF", Font.PLAIN, 18));
